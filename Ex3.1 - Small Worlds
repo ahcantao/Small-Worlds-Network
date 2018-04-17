@@ -1,0 +1,41 @@
+#Optional version using random graphs
+
+n = 30
+R = 50
+iterationsForEachPoint = 50
+clusteringCoefficientMean = list()
+averagePathLengthMean = list()
+errorRate = list()
+
+#Working with network
+#outer iteration - running the code 'R' times
+for iteration in range (0, R):
+    #printig to show the progress... Comment/delete if you want.
+    print("iteration: ", iteration, "of", (R-1))
+    clusteringCoefficient = list()
+    averagePathLength = list()
+    p = iteration/R
+    
+    #inner iteration - getting mean for each point on graph - running 'iterationsForEachPoint' times
+    for j in range (0, iterationsForEachPoint):
+		#generating random network
+        myGraph = nx.gnp_random_graph(n,p)
+        isConnected = nx.is_connected(myGraph)
+        if isConnected == True: #if not connected just skip 
+            clusteringCoefficient.append(nx.average_clustering(myGraph))
+            averagePathLength.append(nx.average_shortest_path_length(myGraph))
+    
+    if clusteringCoefficient: # if not empty list
+        clusteringCoefficientMean.append(np.mean(clusteringCoefficient))
+    if averagePathLength: #if not empty list
+        averagePathLengthMean.append(np.mean(averagePathLength))
+        averagePathLengthStd = np.std(averagePathLength)
+        errorRate.append((averagePathLengthStd) / (np.sqrt(R)))
+
+#Plotting Graph
+plt.xlabel('Clustering Coefficient')
+plt.ylabel('Average Path Length')
+plt.title("Error Rate in Red")
+#plt.plot(clusteringCoefficientMean, averagePathLengthMean, 'b-')
+plt.errorbar(clusteringCoefficientMean, averagePathLengthMean, yerr=errorRate,  ecolor='red')
+plt.show()

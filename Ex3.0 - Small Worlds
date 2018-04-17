@@ -1,0 +1,46 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+
+n = 30 #choose your own value
+R = 20 #choose your own value
+k = int(n/10)  #k-neighbours -> average node connection  #choose your own value
+iterationsForEachPoint = 50 #choose your own value
+clusteringCoefficientMean = list()
+averagePathLengthMean = list()
+errorRate = list()
+
+#Working with network
+#outer iteration - running the code 'R' times
+for iteration in range (0, R):
+    #printig to show the progress... Comment/delete if you want.
+    print("iteration: ", iteration, "of", (R-1))
+    clusteringCoefficient = list()
+    averagePathLength = list()
+    p = iteration/R
+    #inner iteration - getting mean for each point on graph - running 'iterationsForEachPoint' times
+    for j in range (0, iterationsForEachPoint):
+        #optional methods: choose 1 of the 3 graph generators bellow and comment the other 2
+        gr = nx.newman_watts_strogatz_graph(n, k, p, seed=None)
+        #gr = nx.connected_watts_strogatz_graph(n, k, p, tries=100, seed=None)
+        #gr = nx.watts_strogatz_graph(n, k, p, seed=None)
+        
+		#getting graph's Clustering Coefficient
+		clusteringCoefficient.append(nx.average_clustering(gr))
+        clusteringCoefficientMean.append(np.mean(clusteringCoefficient))
+		
+		#getting graph's Average Path Length
+		averagePathLength.append(nx.average_shortest_path_length(gr))
+        averagePathLengthMean.append(np.mean(averagePathLength))
+        
+		#getting Average Path Length's error rate
+		averagePathLengthStd = np.std(averagePathLength)
+		errorRate.append((averagePathLengthStd) / (np.sqrt(R)))
+
+#Plotting Graph
+plt.xlabel('Clustering Coefficient')
+plt.ylabel('Average Path Length')
+plt.title("Error Rate in Red")
+#plt.plot(clusteringCoefficientMean, averagePathLengthMean, 'b-')
+plt.errorbar(sorted(clusteringCoefficientMean), sorted(averagePathLengthMean), yerr=errorRate,  ecolor='red')
+plt.show()
